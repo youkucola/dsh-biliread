@@ -22,7 +22,7 @@ Windows 即 `C:\Users\<你>\.dsh\plugins-data\dsh-biliread\config.json`；可用
     "sessdataRef": "",
     "biliJctRef": ""
   },
-  "llm": "cssmapi:deepseek-flash",
+  "llm": "llm:deepseek-flash",
   "callMode": "auto",
   "maxSubtitleLength": 8000,
   "timeoutMs": 60000,
@@ -37,19 +37,19 @@ Windows 即 `C:\Users\<你>\.dsh\plugins-data\dsh-biliread\config.json`；可用
 | 字段 | 说明 |
 | --- | --- |
 | `bilibili.sessdata` / `bili_jct` | B 站登录态。**AI 字幕必须带登录态**，`view` 接口的 `subtitle.list` 为空不代表没字幕。可在浏览器 F12 或 Cookie Editor 里取。也支持填 `sessdataRef` / `biliJctRef`，从 DSH 凭据服务读，避免明文。 |
-| `llm` | `providerId:modelId`，例如 `cssmapi:deepseek-flash`。**只写这一串**，不写 baseURL / apiKey。 |
+| `llm` | `providerId:modelId`，例如 `llm:deepseek-flash`。**只写这一串**，不写 baseURL / apiKey。 |
 | `callMode` | `auto`（默认，先直连、失败回退宿主）、`direct`（只直连）、`host`（只走 `ctx.llm.stream`）。 |
 | `maxSubtitleLength` | 送进模型的字幕上限，防上下文溢出。 |
 | `preferChineseSubtitle` | 优先选中文字幕，否则取第一条。 |
 
 ## LLM 怎么从 DSH 拉参数
 
-以 `cssmapi:deepseek-flash` 为例，插件在每次总结前做两步：
+以 `llm:deepseek-flash` 为例，插件在每次总结前做两步：
 
 1. **拉 provider 信息**
-   - `ctx.llm.listProviders()` / `listConfigurableProviders()`：确认 `cssmapi` 在 DSH 里注册/声明过；
-   - `ctx.llm.listModels('cssmapi')` / `resolveModelInfo('cssmapi','deepseek-flash')`：拉模型清单与元信息，顺手校验模型名；
-   - 读 `~/.dsh/profiles/<profile>/cordis.patch.yml` 里 `@deepseek-ai/dsh-llm-pi-ai` 组件的 `config.providers.cssmapi`，拿到 `baseURL`、`api`、`apiKeyEnv`（示例中是 `YOUR_LLM_API_KEY`）；
+   - `ctx.llm.listProviders()` / `listConfigurableProviders()`：确认 `llm` 在 DSH 里注册/声明过；
+   - `ctx.llm.listModels('llm')` / `resolveModelInfo('llm','deepseek-flash')`：拉模型清单与元信息，顺手校验模型名；
+   - 读 `~/.dsh/profiles/<profile>/cordis.patch.yml` 里 `@deepseek-ai/dsh-llm-pi-ai` 组件的 `config.providers.llm`，拿到 `baseURL`、`api`、`apiKeyEnv`（示例中是 `YOUR_LLM_API_KEY`）；
    - `ctx.get('credentials').resolve(apiKeyEnv)` 取密钥 —— **密钥不写进 config.json，也不回显**。
 2. **访问该提供商**：默认 `POST ${baseURL}/chat/completions`；若参数缺失或请求失败，`auto` 模式自动回退到 `ctx.llm.stream({ provider, model, ... })`，由宿主完成协议与鉴权。
 
@@ -60,7 +60,7 @@ Windows 即 `C:\Users\<你>\.dsh\plugins-data\dsh-biliread\config.json`；可用
   name: '@deepseek-ai/dsh-llm-pi-ai'
   config:
     providers:
-      cssmapi:
+      llm:
         apiKeyEnv: YOUR_LLM_API_KEY
         api: openai-completions
         baseURL: https://api.example.com/v1
@@ -122,7 +122,9 @@ node test/smoke.mjs
 
 ## 许可证与致谢
 
-- 本项目是 [SodaCodeSave/astrbot_plugin_biliread](https://github.com/SodaCodeSave/astrbot_plugin_biliread) 的 DSH Desktop / Cordis 移植版，原始创意与实现版权归原作者 SodaCodeSave 所有。
-- 本项目以 MIT 协议发布，详见 [LICENSE](LICENSE)。
-- 若上游有独立许可要求，以原项目为准。
+- 本项目是 [SodaCodeSave/astrbot_plugin_biliread](https://github.com/SodaCodeSave/astrbot_plugin_biliread) 的 DSH Desktop / Cordis 移植版，原始创意与实现版权归原作者 SodaCodeSave / AstrBot Plugin Authors 所有。
+- 上游项目以 **AGPL-3.0**（GNU Affero General Public License v3.0）发布，本项目作为衍生作品沿用同一许可，以 **AGPL-3.0-only** 发布，详见 [LICENSE](LICENSE)。
+- **AGPL 第 13 条要点**：如果你修改本程序并让它以网络服务的形式对其他用户提供交互，这些通过网络与程序交互的用户也有权获得该程序的完整源代码（对应源码需可从同一网络服务获取）。
+- 本项目源码地址：<https://github.com/youkucola/dsh-biliread>，部署为网络服务时应向用户提供该地址或其镜像。
+- 分发或修改本项目时，请保留上游版权声明与本许可声明，并同样以 AGPL-3.0-only 开放源代码。
 

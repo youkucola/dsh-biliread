@@ -9,8 +9,8 @@
     ".": "./lib/index.js",
     "./package.json": "./package.json"
   },
-  "files": ["lib", "cordis.patch.yml", "README.md"],
-  "license": "MIT",
+  "files": ["lib", "cordis.patch.yml", "README.md", "LICENSE"],
+  "license": "AGPL-3.0-only",
   "author": "youkucola",
   "repository": {
     "type": "git",

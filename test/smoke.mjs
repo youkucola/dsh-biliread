@@ -1,9 +1,11 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+
 /**
  * 冒烟测试：不装进 DSH，用 mock ctx 直接跑插件代码。
  * 需要网络（B 站 + 模型接口）。密钥全部由环境变量临时提供，不写入任何文件。
  *
  *   DSH_BILIREAD_SESSDATA / DSH_BILIREAD_BILI_JCT
- *   DSH_BILIREAD_LLM_KEY  （模拟 DSH 凭据服务返回的 CSSMAPI_API_KEY）
+ *   DSH_BILIREAD_LLM_KEY  （模拟 DSH 凭据服务返回的 LLM_API_KEY）
  *   DSH_HOME             （默认 ~/.dsh，用于读 profile 的 provider 配置）
  */
 import assert from 'node:assert/strict'
@@ -38,8 +40,8 @@ const ctx = {
   },
   logger: { info: () => {}, warn: () => {}, error: () => {} },
   llm: {
-    listProviders: () => [{ id: 'cssmapi', name: 'cssmapi' }],
-    listConfigurableProviders: () => [{ provider: 'cssmapi', settingsPath: [] }],
+    listProviders: () => [{ id: 'llm', name: 'llm' }],
+    listConfigurableProviders: () => [{ provider: 'llm', settingsPath: [] }],
     listModels: async () => [{ id: 'deepseek-flash' }, { id: 'glm-5.3-flash' }],
     resolveModelInfo: async () => ({ contextWindow: 1000000, inputModalities: ['text'] }),
     stream: async function* () {
@@ -85,8 +87,8 @@ async function main() {
 
   // 2. 纯函数
   check('解析 providerId:modelId', () => {
-    assert.deepEqual(parseModelSpec('cssmapi:deepseek-flash'), { provider: 'cssmapi', model: 'deepseek-flash' })
-    assert.deepEqual(parseModelSpec('cssmapi/deepseek-flash'), { provider: 'cssmapi', model: 'deepseek-flash' })
+    assert.deepEqual(parseModelSpec('llm:deepseek-flash'), { provider: 'llm', model: 'deepseek-flash' })
+    assert.deepEqual(parseModelSpec('llm/deepseek-flash'), { provider: 'llm', model: 'deepseek-flash' })
   })
   try {
     assert.equal(await resolveBvid('BV1854i6XEvC'), 'BV1854i6XEvC')
@@ -99,11 +101,11 @@ async function main() {
   }
 
   // 3. 从 DSH profile 拉 provider 信息
-  const providerInfo = readProviderFromDsh(HOME, 'cssmapi')
-  check('从 DSH profile 拉取 cssmapi 提供商信息', () => {
-    assert.ok(providerInfo, '未在 cordis.patch.yml 里找到 providers.cssmapi')
+  const providerInfo = readProviderFromDsh(HOME, 'llm')
+  check('从 DSH profile 拉取 llm 提供商信息', () => {
+    assert.ok(providerInfo, '未在 cordis.patch.yml 里找到 providers.llm')
     assert.ok(providerInfo.baseURL, '缺 baseURL')
-    assert.equal(providerInfo.apiKeyEnv, 'CSSMAPI_API_KEY')
+    assert.equal(providerInfo.apiKeyEnv, 'LLM_API_KEY')
     assert.ok((providerInfo.models || []).includes('deepseek-flash'))
     return `baseURL=${providerInfo.baseURL}, api=${providerInfo.api}, models=${(providerInfo.models || []).length}`
   })
@@ -115,7 +117,7 @@ async function main() {
       const r = await tool.execute({ bvid: 'BV1854i6XEvC', instruction: '用两句话概括' })
       assert.equal(r.ok, true, r.error)
       assert.ok(r.summary && r.summary.length > 30)
-      assert.equal(r.provider, 'cssmapi')
+      assert.equal(r.provider, 'llm')
       assert.equal(r.model, 'deepseek-flash')
       assert.equal(r.mode, 'direct')
       assert.ok(r.subtitle.rawLength > 0)

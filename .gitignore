@@ -1,0 +1,14 @@
+node_modules/
+*.tgz
+
+# 运行时配置，可能含 SESSDATA / bili_jct 等凭据
+/config.json
+plugins-data/
+.env
+.env.*
+
+# 构建/测试产物
+coverage/
+*.log
+.DS_Store
+Thumbs.db

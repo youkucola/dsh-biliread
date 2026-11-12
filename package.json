@@ -1,0 +1,31 @@
+{
+  "name": "dsh-biliread",
+  "version": "0.1.0",
+  "description": "DSH Desktop plugin: one tool `biliread` that reads Bilibili video subtitles and summarizes them with a DSH-configured LLM provider.",
+  "keywords": ["dsh", "deepseek-harness", "plugin", "bilibili", "subtitle", "summarize"],
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": ["lib", "cordis.patch.yml", "README.md"],
+  "license": "MIT",
+  "author": "youkucola",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/youkucola/dsh-biliread.git"
+  },
+  "homepage": "https://github.com/youkucola/dsh-biliread#readme",
+  "bugs": {
+    "url": "https://github.com/youkucola/dsh-biliread/issues"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

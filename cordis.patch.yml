@@ -1,0 +1,4 @@
+# dsh-biliread：只挂一个宿主组件，工具在组件 apply() 里注册。
+- insert:
+    - id: dsh-biliread
+      name: dsh-biliread

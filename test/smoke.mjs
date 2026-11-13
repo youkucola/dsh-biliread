@@ -160,19 +160,23 @@ async function main() {
   }
 
   // 7. auto 模式：直连失败自动回退 host
-  process.env.DSH_BILIREAD_CALL_MODE = 'auto'
-  process.env.DSH_BILIREAD_BASE_URL = 'http://127.0.0.1:1/v1' // 立即连接失败
-  try {
-    const r = await tool.execute({ bvid: 'BV1854i6XEvC' })
-    assert.equal(r.ok, true, r.error)
-    assert.equal(r.mode, 'host')
-    assert.ok(r.fallbackFrom)
-    results.push(`PASS  auto 直连失败回退 host -> ${String(r.fallbackFrom).slice(0, 90)}`)
-  } catch (error) {
-    results.push(`FAIL  auto 回退 -> ${error.message}`)
-    process.exitCode = 1
-  } finally {
-    delete process.env.DSH_BILIREAD_BASE_URL
+  if (HAS_COOKIE && HAS_KEY) {
+    process.env.DSH_BILIREAD_CALL_MODE = 'auto'
+    process.env.DSH_BILIREAD_BASE_URL = 'http://127.0.0.1:1/v1' // 立即连接失败
+    try {
+      const r = await tool.execute({ bvid: 'BV1854i6XEvC' })
+      assert.equal(r.ok, true, r.error)
+      assert.equal(r.mode, 'host')
+      assert.ok(r.fallbackFrom)
+      results.push(`PASS  auto 直连失败回退 host -> ${String(r.fallbackFrom).slice(0, 90)}`)
+    } catch (error) {
+      results.push(`FAIL  auto 回退 -> ${error.message}`)
+      process.exitCode = 1
+    } finally {
+      delete process.env.DSH_BILIREAD_BASE_URL
+    }
+  } else {
+    skip('auto 直连失败回退 host', '缺 Cookie 或 LLM key')
   }
 
   // 8. render 输出
